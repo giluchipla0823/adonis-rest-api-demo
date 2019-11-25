@@ -1,0 +1,35 @@
+# Crear proyecto
+adonis new [PROJECT_NAME]
+
+# Iniciar proyecto
+adonis serve --dev
+
+# Instalar mysql
+npm i --save mysql
+
+# ORM
+- Lucid parecido a Eloquent.
+
+# Ejecutar migraciones
+adonis migration:run
+
+# Crear controlador
+adonis make:controller [CONTROLLER_NAME] --resource
+
+# Crear modelos
+adonis make:model [MODEL_NAME] --migration
+
+# Authenticators: api
+Ver configuración de archivo auth.js
+
+# Instalar paquete para validadors
+adonis install @adonisjs/validator
+
+# Crear validador
+adonis make:validator [VALIDATOR_NAME]
+
+# Crear excepción Global
+adonis make:eHandler
+
+
+
