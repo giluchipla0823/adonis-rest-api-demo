@@ -1,8 +1,12 @@
 'use strict';
 
+/** @typedef {import('@adonisjs/framework/src/Response')} Response */
+/** @typedef {import('@adonisjs/framework/src/Request')} Request */
+
 const BaseExceptionHandler = use('BaseExceptionHandler');
 const { ValidationException } = require('@adonisjs/validator/src/Exceptions');
-const { PasswordMisMatchException } = require('@adonisjs/auth/src/Exceptions');
+const { PasswordMisMatchException, InvalidApiToken } = require('@adonisjs/auth/src/Exceptions');
+const { ModelNotFoundException } = require('@adonisjs/lucid/src/Exceptions');
 
 /**
  * This class handles all exceptions thrown during
@@ -24,17 +28,26 @@ class ExceptionHandler extends BaseExceptionHandler {
    */
   async handle (error, { request, response }) {
     if (error instanceof PasswordMisMatchException) {
-      return response.status(error.status).send({
-        code: error.status,
-        message: 'Credenciales de acceso incorrectas'
-      });
+      return this.resolveUnauthorizedException(error, response);
     }
 
     if (error instanceof ValidationException) {
-      return this.resolveValidationExceptions(error, response);
+      return this.resolveValidationException(error, response);
     }
 
-    return response.status(error.status).send({message: error});
+    if (error instanceof InvalidApiToken) {
+      return response.error('The api token is missing or invalid', error.status);
+    }
+
+    if (error instanceof ModelNotFoundException) {
+      let model = error.message.replace('E_MISSING_DATABASE_ROW: Cannot find database row for ', '').split('model')[0].trim().toLowerCase();
+
+      const message = `No existe una instancia de ${model} con el id especificado`;
+
+      return response.error(message, error.status);
+    }
+
+    return response.error(error.message, error.status);
   }
 
   /**
@@ -50,12 +63,16 @@ class ExceptionHandler extends BaseExceptionHandler {
   async report (error, { request }) {
   }
 
-  resolveValidationExceptions(error, response) {
-    return response.status(error.status).send({
-      code: error.status,
-      message: error.message,
-      errors: error.messages
-    });
+  resolveUnauthorizedException(error, response){
+    return response.error('Credenciales de acceso incorrectas', error.status);
+  }
+
+  resolveValidationException(error, response) {
+    return response.error(
+      error.message,
+      error.status,
+      {errors: error.messages}
+    );
   }
 }
 

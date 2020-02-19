@@ -1,0 +1,35 @@
+const StatusCodes = use('App/Helpers/Response');
+
+class ApiResponse {
+    static successResponse(response, data, message = 'OK', code = StatusCodes.HTTP_OK, extras = {}) {
+        return this.makeResponse(response, data, message, code, extras);
+    }
+
+    static showMessageResponse(response, message, code = StatusCodes.HTTP_OK){
+        return this.successResponse(response, null, message, code);
+    }
+
+    static errorResponse(response, message, code, extras = {}) {
+        return this.makeResponse(response, null, message, code, extras);
+    }
+
+    static makeResponse(response, data, message, code, extras) {
+        let result = { 
+            jsonapi: {
+                version: '1.0.0'
+            },
+            code, 
+            message 
+        };
+
+        if (data) {
+            result.data = data;
+        }
+
+        result = Object.assign(result, extras);
+
+        return response.status(code).json(result);
+    }
+}
+
+module.exports = ApiResponse;

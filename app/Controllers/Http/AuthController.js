@@ -5,6 +5,7 @@
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
 const User = use('App/Models/User');
+const StatusCode = use('App/Helpers/StatusCodes');
 
 /**
  * Resourceful controller for interacting with auths
@@ -24,7 +25,7 @@ class AuthController {
 
     const user = await auth.attempt(email, password);
 
-    return response.status(200).send(user);
+    return response.success(user);
   }
 
 
@@ -48,7 +49,20 @@ class AuthController {
 
     await auth.generate(user);
 
-    return response.status(201).send(user);
+    return response.success(user, 'User created successfully', StatusCode.HTTP_CREATED);
+  }
+
+  async profile ({ auth, response }) {
+    const user = await auth.getUser();
+
+    return response.success(user);
+  }
+
+  async revokeUserToken ({ auth, response }) {
+    const user = await auth.getUser();
+    await user.tokens().update({is_revoked: true});
+
+    return response.showMessage('Tokens revoked');
   }
 }
 
