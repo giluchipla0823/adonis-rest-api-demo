@@ -25,7 +25,7 @@ Route.group(() => {
     Route.post('revokeUserToken', 'AuthController.revokeUserToken').middleware(['auth:api']);
 
     Route.resource('books', 'BookController')
-         //.middleware(['auth:api'])
+         .middleware(['auth:api'])
          .validator(new Map([
             ['books.store', 'StoreBook'],
             ['books.update', 'UpdateBook'],
